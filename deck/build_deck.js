@@ -52,56 +52,67 @@ async function iconDot(s, name, x, y, d) {
 const B = (text, extra) => ({ text, options: Object.assign({ bold: true }, extra) });
 const R = (text, extra) => ({ text, options: Object.assign({}, extra) });
 
+// Workflow chip — the five decision workflows are the deck's core taxonomy; same chip everywhere.
+const chipW = (t, fs) => 0.32 + t.length * fs * 0.0078;
+function chip(s, t, x, y, o = {}) {
+  const fs = o.fontSize || 10, h = o.h || 0.32, w = o.w || chipW(t, fs);
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x, y, w, h, rectRadius: h / 2, fill: { color: COL.tint }, line: { color: COL.navy, width: 0.75 }, objectName: 'workflow chip ' + t });
+  tx(s, t, { x, y, w, h, fontSize: fs, bold: true, color: COL.navy, align: 'center', valign: 'middle' });
+  return w;
+}
+const cardLabel = (s, t, x, y, w) => tx(s, t, { x, y, w, h: 0.3, fontSize: 13, bold: true, color: COL.orange, charSpacing: 1.5, valign: 'middle', objectName: 'card label' });
+
 // ---------- SLIDE 1 — EXECUTIVE SUMMARY ----------
 async function slide1() {
   const s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: 'Executive summary' });
   s.addText('EXECUTIVE SUMMARY', { placeholder: 'kicker' });
   s.addText('Conversational AI is being marketed across life sciences workflows, creating new ways to access information, analytics and decision support', { placeholder: 'title' });
 
-  // Outside-in research lens (full width)
-  card(s, L, 1.72, W, 1.18, 'lens card');
-  await iconDot(s, 'MdTravelExplore', L + 0.25, 1.95, 0.5);
-  label(s, 'OUTSIDE-IN RESEARCH LENS', L + 0.95, 1.9, 6);
-  tx(s, [
-    R('An assessment of publicly-marketed conversational AI products across six core Optum Life Sciences workflows: data access, RWE, market access, clinical trials, commercial intelligence, and medical/regulatory research.', { breakLine: true }),
-    R('The U.S. competitive landscape is the primary focus; selected international offerings provide context; and Optum LS is the strategic reference point.'),
-  ], { x: L + 0.95, y: 2.15, w: 10.9, h: 0.65, fontSize: 11, paraSpaceAfter: 3 });
+  // Outside-in research lens (full width) with the five workflows as chips
+  const ly = 1.68, lh = 1.5;
+  card(s, L, ly, W, lh, 'lens card');
+  await iconDot(s, 'MdTravelExplore', L + 0.25, ly + 0.22, 0.52);
+  cardLabel(s, 'OUTSIDE-IN RESEARCH LENS', L + 0.95, ly + 0.2, 6);
+  tx(s, 'An assessment of publicly marketed conversational AI across five Optum Life Sciences decision workflows:', { x: L + 0.95, y: ly + 0.56, w: 10.9, h: 0.22, fontSize: 11 });
+  let x = L + 0.95; const chy = ly + 0.84;
+  for (const [i, t] of ['RWE', 'Commercial intelligence', 'Medical / regulatory research', 'Clinical trials', 'Market access'].entries()) {
+    if (i === 4) { tx(s, 'and', { x, y: chy, w: 0.36, h: 0.32, fontSize: 10, color: COL.muted, align: 'center', valign: 'middle' }); x += 0.42; }
+    x += chip(s, t, x, chy) + 0.12;
+  }
+  tx(s, 'The U.S. competitive landscape is the primary focus; selected international offerings provide context; and Optum LS is the strategic reference point.', { x: L + 0.95, y: ly + 1.22, w: 10.9, h: 0.22, fontSize: 11 });
 
-  const cy = 3.05, ch = 3.08, cw = 3.91, gap = 0.2;
+  const cy = 3.32, ch = 2.85, cw = 3.91, gap = 0.2;
   const cx = [L, L + cw + gap, L + 2 * (cw + gap)];
+  const head = async (i, ic, t) => { card(s, cx[i], cy, cw, ch, t.toLowerCase() + ' card'); await iconDot(s, ic, cx[i] + 0.25, cy + 0.22, 0.5); cardLabel(s, t, cx[i] + 0.88, cy + 0.32, cw - 1.0); };
 
-  // Key findings
-  card(s, cx[0], cy, cw, ch, 'key findings card');
-  await iconDot(s, 'MdInsights', cx[0] + 0.25, cy + 0.25, 0.46);
-  label(s, 'KEY FINDINGS', cx[0] + 0.85, cy + 0.37, 2.8);
-  tx(s, '19', { x: cx[0] + 0.25, y: cy + 0.86, w: 0.85, h: 0.6, fontSize: 36, bold: true, color: COL.orange, objectName: 'hero 19' });
-  tx(s, [R('The U.S. screen identified '), B('19 qualifying conversational AI offerings across five of six domains'), R(', concentrated in RWE and commercial intelligence.')],
-    { x: cx[0] + 1.12, y: cy + 0.9, w: 2.58, h: 0.98, fontSize: 10.5 });
-  s.addShape(pres.shapes.LINE, { x: cx[0] + 0.25, y: cy + 1.97, w: cw - 0.5, h: 0, line: { color: COL.neutral, width: 0.75 } });
-  tx(s, '10', { x: cx[0] + 0.25, y: cy + 2.05, w: 0.85, h: 0.6, fontSize: 36, bold: true, color: COL.orange, objectName: 'hero 10' });
-  tx(s, [R('The selected international comparison identified '), B('10 qualifying offerings'), R(', providing additional examples of how vendors position conversational interaction.')],
-    { x: cx[0] + 1.12, y: cy + 2.09, w: 2.58, h: 0.9, fontSize: 10.5 });
+  // Key findings — number and sentence share a top line and a fixed gutter
+  await head(0, 'MdInsights', 'KEY FINDINGS');
+  const kf = [['19', 'The U.S. screen identified 19 qualifying conversational AI offerings across five decision workflows, concentrated in RWE and commercial intelligence.'],
+              ['10', 'The selected international comparison identified 10 qualifying offerings, providing additional examples of how vendors position conversational interaction.']];
+  kf.forEach(([n, t], i) => {
+    const y = cy + 0.95 + i * 0.98;
+    if (i) s.addShape(pres.shapes.LINE, { x: cx[0] + 0.25, y: y - 0.12, w: cw - 0.5, h: 0, line: { color: COL.neutral, width: 0.75 } });
+    tx(s, n, { x: cx[0] + 0.25, y: y - 0.07, w: 0.68, h: 0.55, fontSize: 34, bold: true, color: COL.orange, objectName: 'hero ' + n });
+    tx(s, t, { x: cx[0] + 0.98, y, w: cw - 1.2, h: 0.82, fontSize: 10.5 });
+  });
 
-  // Optum positioning
-  card(s, cx[1], cy, cw, ch, 'optum positioning card');
-  await iconDot(s, 'MdOutlineLayers', cx[1] + 0.25, cy + 0.25, 0.46);
-  label(s, 'OPTUM POSITIONING', cx[1] + 0.85, cy + 0.37, 2.8);
+  // Optum positioning — three sentences as three paragraphs
+  await head(1, 'MdOutlineLayers', 'OPTUM POSITIONING');
   tx(s, [
-    R('Optum LS publicly emphasizes linked healthcare data, AI-enabled research tools and scientific expertise. Several competitors prominently market conversational interfaces as the entry point to comparable customer tasks. '),
+    R('Optum LS publicly emphasizes linked healthcare data, AI-enabled research tools and scientific expertise.', { breakLine: true }),
+    R('Several competitors prominently market conversational interfaces as the entry point to comparable customer tasks.', { breakLine: true }),
     B('This reflects differences in public positioning, not necessarily in underlying functionality.', { color: COL.navy }),
-  ], { x: cx[1] + 0.25, y: cy + 0.9, w: cw - 0.5, h: 2.0, fontSize: 11 });
+  ], { x: cx[1] + 0.25, y: cy + 0.95, w: cw - 0.5, h: 1.8, fontSize: 11, paraSpaceAfter: 9 });
 
   // Strategic implication
-  card(s, cx[2], cy, cw, ch, 'strategic implication card');
-  await iconDot(s, 'MdOutlineLightbulb', cx[2] + 0.25, cy + 0.25, 0.46);
-  label(s, 'STRATEGIC IMPLICATION', cx[2] + 0.85, cy + 0.37, 2.8);
+  await head(2, 'MdOutlineLightbulb', 'STRATEGIC IMPLICATION');
   tx(s, 'The competitive significance of conversational AI depends on the customer task, underlying data and reliability of the results.',
-    { x: cx[2] + 0.25, y: cy + 0.9, w: cw - 0.5, h: 0.8, fontSize: 11 });
+    { x: cx[2] + 0.25, y: cy + 0.95, w: cw - 0.5, h: 0.75, fontSize: 11 });
   tx(s, "Where could conversational interaction add value to Optum's existing offerings?",
-    { x: cx[2] + 0.25, y: cy + 1.78, w: cw - 0.5, h: 1.0, fontSize: 14, bold: true, color: COL.navy, objectName: 'strategic question' });
+    { x: cx[2] + 0.25, y: cy + 1.75, w: cw - 0.5, h: 0.95, fontSize: 14, bold: true, color: COL.navy, objectName: 'strategic question' });
 
   tx(s, 'Evidence boundary: Public product marketing and announcements reviewed as of October 13, 2026. The findings describe selected screened inventories—not a market census, adoption rates, verified product performance or undisclosed capabilities.',
-    { x: L, y: 6.27, w: W, h: 0.4, fontSize: 9, italic: true, color: COL.muted, objectName: 'evidence boundary' });
+    { x: L, y: 6.3, w: W, h: 0.4, fontSize: 9, italic: true, color: COL.muted, objectName: 'evidence boundary' });
 }
 
 // ---------- SLIDE 3 — U.S. COMPETITIVE LANDSCAPE ----------
@@ -110,38 +121,39 @@ async function slide3() {
   s.addText('U.S. COMPETITIVE LANDSCAPE', { placeholder: 'kicker' });
   s.addText('Conversational AI is most prominent in RWE among screened U.S. competitors; Optum has relevant offerings across five decision workflows', { placeholder: 'title' });
 
-  const LW = 8.3; // left (chart) zone width
-  // U.S. competitive screen — KPI tiles
-  label(s, 'U.S. COMPETITIVE SCREEN', L, 1.66, 6);
-  const tiles = [['45', 'competitor groups initially screened'], ['15', 'distinct groups marketing qualifying conversational AI'], ['19', 'qualifying conversational AI offerings across five of six workflows']];
-  const tw = (LW - 0.3) / 3;
+  // U.S. competitive screen — KPI tiles linked by arrows
+  label(s, 'U.S. COMPETITIVE SCREEN', L, 1.6, 6);
+  const tiles = [['45', 'competitor groups initially screened'], ['15', 'distinct groups marketing qualifying conversational AI'], ['19', 'qualifying conversational AI offerings across five decision workflows']];
+  const aw = 0.62, tw = (W - 2 * aw) / 3, ty = 1.86, th = 0.58;
   tiles.forEach(([n, t], i) => {
-    const x = L + i * (tw + 0.15);
-    s.addShape(pres.shapes.RECTANGLE, { x, y: 1.95, w: tw, h: 0.72, fill: { color: COL.navy }, line: { type: 'none' }, objectName: 'kpi tile ' + n });
-    tx(s, n, { x: x + 0.15, y: 1.95, w: 0.75, h: 0.72, fontSize: 28, bold: true, color: i === 2 ? COL.orange : COL.white, valign: 'middle' });
-    tx(s, t, { x: x + 0.92, y: 1.95, w: tw - 1.02, h: 0.72, fontSize: 9.5, color: COL.white, valign: 'middle' });
+    const x = L + i * (tw + aw);
+    s.addShape(pres.shapes.RECTANGLE, { x, y: ty, w: tw, h: th, fill: { color: COL.navy }, line: { type: 'none' }, objectName: 'kpi tile ' + n });
+    tx(s, n, { x: x + 0.18, y: ty, w: 0.75, h: th, fontSize: 26, bold: true, color: i === 2 ? COL.orange : COL.white, valign: 'middle' });
+    tx(s, t, { x: x + 0.95, y: ty, w: tw - 1.08, h: th, fontSize: 10, color: COL.white, valign: 'middle' });
+    if (i < 2) s.addShape(pres.shapes.RIGHT_ARROW, { x: x + tw + 0.14, y: ty + th / 2 - 0.13, w: aw - 0.28, h: 0.26, fill: { color: COL.muted }, line: { type: 'none' }, objectName: 'flow arrow' });
   });
 
-  // Competitor coverage and Optum LS positioning — mirrored chart
-  label(s, 'COMPETITOR COVERAGE AND OPTUM LS POSITIONING', L, 2.86, 7);
+  // Competitor coverage and Optum LS positioning — mirrored chart + table
+  label(s, 'COMPETITOR COVERAGE AND OPTUM LS POSITIONING', L, 2.6, 7);
   const rows = [
-    ['RWE', 9, 34, 'Analytics on Demand; epidemiology research'],
-    ['Commercial intelligence', 3, 23, 'Market Clarity: portfolio and patient/prescriber analytics'],
-    ['Medical / regulatory research', 3, 18, 'Postapproval safety studies; Market Clarity medical affairs insights'],
-    ['Clinical trials', 1, 25, 'Prospector; Digital Research Network; True Source'],
-    ['Market access', 1, 24, 'HEOR/value evidence; Evidence Engine'],
+    ['RWE', 9, 34, 'Komodo Marmot and MapAI; Truveta Intelligence; Flatiron Telescope; Tempus Lens', 'Analytics on Demand; epidemiology research'],
+    ['Commercial intelligence', 3, 23, 'IQVIA Field Force Agent and GMI Agent; ZS Conversational AI for Commercial; Trinity InsightsEDGE Digital Twins', 'Market Clarity: portfolio and patient/prescriber analytics'],
+    ['Medical / regulatory research', 3, 18, 'IQVIA Med-R1; ZS Conversational AI for Medical; Veeva Vault AI Chat', 'Postapproval safety studies; Market Clarity medical affairs insights'],
+    ['Clinical trials', 1, 25, 'TriNetX Terrain AI Assistant', 'Prospector; Digital Research Network; True Source'],
+    ['Market access', 1, 24, 'EVERSANA Ask NAVLIN', 'HEOR/value evidence; Evidence Engine'],
   ];
-  const hy = 3.13, hh = 0.4, ry = hy + hh, rh = 0.46;
-  const colX = { bars: L, wf: 4.0, opt: 5.95, chat: 8.0 }, colW = { bars: 3.3, wf: 1.85, opt: 2.0, chat: 0.9 };
-  s.addShape(pres.shapes.RECTANGLE, { x: L, y: hy, w: LW, h: hh, fill: { color: COL.navy }, line: { type: 'none' }, objectName: 'table header' });
-  const hdr = { y: hy, h: hh, fontSize: 8.5, bold: true, color: COL.white, valign: 'middle' };
-  tx(s, 'U.S. competitors marketing chat / comparable competitors', { ...hdr, x: colX.bars + 0.1, w: colW.bars - 0.2, align: 'right' });
-  tx(s, 'Workflow', { ...hdr, x: colX.wf, w: colW.wf, align: 'center' });
-  tx(s, "Optum's publicly marketed offerings", { ...hdr, x: colX.opt, w: colW.opt });
-  tx(s, 'Optum public chat claim', { ...hdr, x: colX.chat, w: colW.chat, align: 'center' });
+  const hy = 2.86, hh = 0.48, ry = hy + hh, rh = 0.49;
+  const cX = { bars: L, wf: 3.8, rep: 6.0, opt: 9.3, chat: 11.75 }, cW = { bars: 3.15, wf: 2.15, rep: 3.15, opt: 2.3, chat: 0.98 };
+  s.addShape(pres.shapes.RECTANGLE, { x: L, y: hy, w: W, h: hh, fill: { color: COL.tint }, line: { type: 'none' }, objectName: 'table header' });
+  const hdr = { y: hy, h: hh, fontSize: 9, bold: true, color: COL.navy, valign: 'middle', align: 'center' };
+  tx(s, [R('U.S. competitors marketing chat /', { breakLine: true }), R('comparable competitors')], { ...hdr, x: cX.bars + 0.6, w: 2.45 });
+  tx(s, 'Workflow', { ...hdr, x: cX.wf, w: cW.wf });
+  tx(s, 'Representative conversational AI offerings', { ...hdr, x: cX.rep, w: cW.rep });
+  tx(s, [R("Optum's publicly", { breakLine: true }), R('marketed offerings')], { ...hdr, x: cX.opt, w: cW.opt });
+  tx(s, 'Optum public chat claim', { ...hdr, x: cX.chat - 0.1, w: cW.chat + 0.1 });
 
-  // Native stacked bar chart extending left from the workflow spine
-  const chartX = 1.3, chartW = 2.6, maxV = 34;
+  // Native stacked bar chart extending left toward the workflow spine
+  const chartX = cX.bars + 0.68, chartW = 2.42, maxV = 34;
   s.addChart(pres.charts.BAR, [
     { name: 'Marketing qualifying chat', labels: rows.map(r => r[0]), values: rows.map(r => r[1]) },
     { name: 'Remaining comparable', labels: rows.map(r => r[0]), values: rows.map(r => r[2] - r[1]) },
@@ -151,45 +163,27 @@ async function slide3() {
     valAxisHidden: true, catAxisHidden: true, valGridLine: { style: 'none' }, catGridLine: { style: 'none' },
     showLegend: false, showValue: false, layout: { x: 0, y: 0, w: 1, h: 1 }, objectName: 'competitor coverage chart',
   });
-  rows.forEach(([wf, n, d, opt], i) => {
+  rows.forEach(([wf, n, d, rep, opt], i) => {
     const y = ry + i * rh;
     const barLeft = chartX + chartW * (1 - d / maxV);
-    tx(s, [B(`${n}`, { color: COL.navy }), R(` / ${d}`)], { x: barLeft - 0.7, y, w: 0.62, h: rh, fontSize: 10, align: 'right', valign: 'middle', objectName: 'fraction ' + wf });
-    tx(s, wf, { x: colX.wf + 0.05, y, w: colW.wf - 0.1, h: rh, fontSize: 10, bold: true, color: COL.navy, align: 'center', valign: 'middle' });
-    tx(s, opt, { x: colX.opt, y, w: colW.opt, h: rh, fontSize: 9, valign: 'middle' });
-    s.addShape(pres.shapes.OVAL, { x: colX.chat + colW.chat / 2 - 0.09, y: y + rh / 2 - 0.09, w: 0.18, h: 0.18, fill: { type: 'none' }, line: { color: COL.navy, width: 1.25 }, objectName: 'chat status ' + wf });
-    s.addShape(pres.shapes.LINE, { x: L, y: y + rh, w: LW, h: 0, line: { color: COL.neutral, width: 0.75 } });
+    tx(s, [B(`${n}`, { color: COL.navy }), R(` / ${d}`)], { x: barLeft - 0.66, y, w: 0.6, h: rh, fontSize: 10, align: 'right', valign: 'middle', objectName: 'fraction ' + wf });
+    chip(s, wf, cX.wf + 0.08, y + (rh - 0.34) / 2, { w: cW.wf - 0.16, h: 0.34, fontSize: 9 });
+    tx(s, rep, { x: cX.rep + 0.1, y, w: cW.rep - 0.2, h: rh, fontSize: 9, valign: 'middle' });
+    tx(s, opt, { x: cX.opt + 0.1, y, w: cW.opt - 0.2, h: rh, fontSize: 9, valign: 'middle' });
+    s.addShape(pres.shapes.OVAL, { x: cX.chat + cW.chat / 2 - 0.09, y: y + rh / 2 - 0.09, w: 0.18, h: 0.18, fill: { type: 'none' }, line: { color: COL.muted, width: 1.25 }, objectName: 'chat status ' + wf });
+    s.addShape(pres.shapes.LINE, { x: L, y: y + rh, w: W, h: 0, line: { color: COL.neutral, width: 0.75 } });
   });
+  const ty2 = ry + rh * rows.length + 0.07;
+  tx(s, 'Scope note: Offerings are organized by their primary customer decision workflow; supporting data and analytics capabilities may serve more than one workflow.',
+    { x: L, y: ty2, w: 9.6, h: 0.2, fontSize: 8, bold: true, color: COL.muted, objectName: 'scope note' });
+  tx(s, '○  Not publicly established in this review', { x: 10.3, y: ty2, w: W + L - 10.3, h: 0.2, fontSize: 8, italic: true, color: COL.muted, align: 'right', objectName: 'chat claim legend' });
 
-  // Right column: representative offerings + key takeaway
-  const rx = L + LW + 0.25, rw = W - LW - 0.25;
-  card(s, rx, 1.66, rw, 2.6, 'representative offerings card');
-  tx(s, 'REPRESENTATIVE CONVERSATIONAL AI OFFERINGS', { x: rx + 0.2, y: 1.82, w: rw - 0.4, h: 0.4, fontSize: 10, bold: true, color: COL.orange, charSpacing: 1, objectName: 'label' });
-  const reps = [
-    ['RWE:', ' Komodo Marmot and MapAI; Truveta Intelligence; Flatiron Telescope; Tempus Lens'],
-    ['Commercial intelligence:', ' IQVIA Field Force Agent and GMI Agent; ZS Conversational AI for Commercial; Trinity InsightsEDGE Digital Twins'],
-    ['Medical / regulatory:', ' IQVIA Med-R1; ZS Conversational AI for Medical; Veeva Vault AI Chat'],
-    ['Clinical trials:', ' TriNetX Terrain AI Assistant'],
-    ['Market access:', ' EVERSANA Ask NAVLIN'],
-  ];
-  const repRuns = [];
-  reps.forEach(([k, v], i) => { repRuns.push(B(k, { color: COL.navy })); repRuns.push(R(v, { breakLine: i < reps.length - 1 })); });
-  tx(s, repRuns, { x: rx + 0.2, y: 2.3, w: rw - 0.4, h: 1.85, fontSize: 9, paraSpaceAfter: 3 });
-
-  card(s, rx, 4.38, rw, 1.52, 'key takeaway card');
-  label(s, 'KEY TAKEAWAY', rx + 0.2, 4.53, rw - 0.4);
+  // Key takeaway — full-width strip
+  const ky = 6.12, kh = 0.6;
+  card(s, L, ky, W, kh, 'key takeaway card');
+  tx(s, 'KEY TAKEAWAY', { x: L + 0.2, y: ky, w: 1.7, h: kh, fontSize: 10, bold: true, color: COL.orange, charSpacing: 1, valign: 'middle', objectName: 'label' });
   tx(s, 'RWE has the largest number of screened U.S. companies marketing qualifying conversational AI. Optum offers products and services across the five decision workflows shown, but a qualifying customer-facing conversational interface was not established in the reviewed public materials.',
-    { x: rx + 0.2, y: 4.8, w: rw - 0.4, h: 1.0, fontSize: 9.5 });
-
-  // Scope note + methodology note (footnotes)
-  tx(s, [
-    B('Scope note: Data access/enrichment is a cross-workflow enabling category. Zero qualifying chat offerings assigned primarily to this domain does not imply an absence of conversational data-access capabilities in products classified under RWE or other workflows.', { breakLine: true }),
-    B('METHODOLOGY NOTE  '),
-    R('Comparable competitors include '), B('direct and specialized/partial offering-level competitors'),
-    R(" serving similar customer tasks; adjacent participants are excluded. Counts represent distinct company groups per workflow, not product totals. A company may appear in multiple workflows. Optum's ○ indicates that a qualifying conversational interface was "),
-    R('not publicly established in this review', { italic: true }),
-    R(', not that the capability is absent. These are selected screened companies, not market-wide adoption rates.'),
-  ], { x: L, y: 5.97, w: W, h: 0.75, fontSize: 8, color: COL.muted, paraSpaceAfter: 2, objectName: 'scope and methodology notes' });
+    { x: L + 1.95, y: ky, w: W - 2.15, h: kh, fontSize: 10.5, valign: 'middle' });
 }
 
 (async () => {
