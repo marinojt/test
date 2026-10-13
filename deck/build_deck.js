@@ -190,21 +190,21 @@ async function slide3() {
 const WF = ['RWE', 'Commercial intelligence', 'Medical / regulatory research', 'Clinical trials', 'Market access'];
 const COUNTRY = /(\((?:Israel|Finland|China|Australia|Argentina|France|Spain)\))/;
 // "**bold**" spans; "(Country)" tags flag international examples in orange
-function rich(str, base = {}) {
+function rich(str, base = {}, plain = false) {
   const out = [];
   str.split('**').forEach((seg, i) => {
     seg.split(COUNTRY).forEach(p => {
       if (!p) return;
-      const c = COUNTRY.test(p) && /^\(.*\)$/.test(p);
+      const c = !plain && COUNTRY.test(p) && /^\(.*\)$/.test(p);
       out.push({ text: p, options: Object.assign({}, base, (i % 2 === 1 || c) ? { bold: true } : {}, c ? { color: COL.orange } : {}) });
     });
   });
   return out;
 }
-function paras(list, base = {}, gap = true) {
+function paras(list, base = {}, gap = true, plain = false) {
   const runs = [];
   list.forEach((str, i) => {
-    const r = rich(str, base);
+    const r = rich(str, base, plain);
     if (i < list.length - 1) { r[r.length - 1].options.breakLine = true; }
     if (gap && i > 0) r[0].options.paraSpaceBefore = 4;
     runs.push(...r);
@@ -234,15 +234,15 @@ function taskTable(s, y, rows, opt = {}) {
   const est = (str, w, f) => lines(str, Math.floor((w - 0.24) / (f * 0.0062))) * f * 1.22 / 72;
   const none = { type: 'none' }, hair = { type: 'solid', pt: 0.75, color: HEX.neutral }, white = { type: 'solid', pt: 2, color: HEX.white };
   const hd = { fill: { color: COL.navy }, color: COL.white, bold: true, fontSize: 9, valign: 'middle', charSpacing: 1, border: [none, none, none, none] };
-  const head = (opt.head || ['CUSTOMER TASK', 'COMPETITOR CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS']).map(t => ({ text: t, options: hd }));
+  const head = (opt.head || ['CUSTOMER TASK', 'COMPETITOR CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS']).map(t => ({ text: t, options: Object.assign({}, hd, opt.headAlign ? { align: opt.headAlign } : {}) }));
   const rowH = [0.36];
   const body = rows.map(([task, comp, optum], i) => {
     const h = Math.max(est(task, colW[0], 11.5), comp.reduce((n, c) => n + est(c, colW[1], fs), 0) + (comp.length - 1) * 0.06, est(optum, colW[2], fs)) + 0.2;
     rowH.push(h);
     const bot = opt.groupAfter === i ? { type: 'solid', pt: 1.5, color: HEX.navy } : hair;
     return [
-      { text: task, options: { fill: { color: opt.taskFill ? opt.taskFill(i) : COL.tint }, color: opt.taskColor ? opt.taskColor(i) : COL.navy, bold: true, fontSize: 10.5, valign: 'middle', border: [white, white, white, none] } },
-      { text: paras(comp, {}), options: { fontSize: fs, color: COL.body, valign: 'middle', border: [none, none, bot, none] } },
+      { text: task, options: { fill: { color: opt.taskFill ? opt.taskFill(i) : COL.tint }, color: opt.taskColor ? opt.taskColor(i) : COL.navy, bold: true, fontSize: 10.5, valign: 'middle', align: opt.taskAlign || 'left', border: [white, white, white, none] } },
+      { text: paras(comp, {}, true, !!opt.plainCountry), options: { fontSize: fs, color: COL.body, valign: 'middle', border: [none, none, bot, none] } },
       { text: rich(optum), options: { fontSize: fs, color: COL.body, valign: 'middle', border: [none, none, bot, none] } },
     ];
   });
@@ -398,15 +398,16 @@ const slide6 = () => workflowSlide({
 const slide7 = () => workflowSlide({
   section: 'Workflow deep dives', kicker: 'CONVERSATIONAL AI IN COMMERCIAL INTELLIGENCE', active: ['Commercial intelligence'],
   title: 'Commercial AI products extend conversational interaction into market intelligence, field decisions and simulated stakeholder research',
-  label: 'COMMERCIAL INTELLIGENCE — COMPETITIVE EXAMPLES', counts: 'U.S. screen: 3 company groups | 4 qualifying conversational AI offerings',
+  label: 'COMMERCIAL INTELLIGENCE — COMPETITIVE EXAMPLES',
+  table: { head: ['CUSTOMER TASK', 'CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS'], headAlign: 'center', taskAlign: 'center', plainCountry: true },
   rows: [
     ['Pharmaceutical market and portfolio intelligence', ['IQVIA’s **GMI Agent**: global market insights;', 'GBI Health’s **GBI BOT** (China): pharmaceutical database Q&A and competitive intelligence;', 'Prospection’s **ProGPT** (Australia): conversational patient and market insights for brand planning'], 'Market Clarity: market attractiveness and portfolio research'],
-    ['Commercial field and prescribing decisions', ['IQVIA’s **Field Force Agent**: commercial field support;', 'ZS’s **ZAIDYN Conversational AI for Commercial**: commercial information and decision support;', 'Close-Up International’s **Xplora AI** (Argentina): AI-enabled pharmaceutical CRM and commercial intelligence'], 'Market Clarity: patient and prescriber analytics'],
+    ['Commercial field and prescribing decisions', ['IQVIA’s **Field Force Agent**: commercial field support;', 'ZS’s **ZAIDYN Conversational AI for Commercial**: commercial information and decision support;', 'Close-Up International’s **Xplora AI** (Spain): AI-enabled pharmaceutical CRM and commercial intelligence'], 'Market Clarity: patient and prescriber analytics'],
     ['Simulated stakeholder research', ['Trinity Life Sciences’ **InsightsEDGE Digital Twins**: conversational simulated personas;', 'Ipsos’s **Healthcare PersonaBot** (France): interaction with simulated healthcare stakeholders'], 'Market Clarity provides market insights; a directly comparable simulated-persona offering was not established in the Optum review'],
   ],
   cards: [
-    ['QUESTIONS FOR COMPARISON', 'Which decisions are these products designed to support? What underlying commercial information can users access? Where does an assistant move beyond analytics into field execution or simulated research?'],
-    ['TRANSITION TO OTHER WORKFLOWS', 'How does the comparison change for medical affairs, clinical development and market access, where the intended users, evidence requirements and decisions differ?'],
+    ['QUESTIONS FOR COMPARISON', 'Which decisions are these products designed to support? What underlying commercial information can users access? Where does an assistant move beyond analytics into field execution or simulated research?', { bold: true }],
+    ['TRANSITION TO OTHER WORKFLOWS', 'How does the comparison change for medical affairs, clinical development and market access, where the intended users, evidence requirements and decisions differ?', { bold: true }],
   ],
   eb: ebLabel('Scope: All four qualifying U.S. commercial conversational offerings plus four selected international examples. Customer tasks are not interchangeable; Optum comparisons are based on public offerings, not feature-for-feature validation. International examples are illustrative, not a geographic prevalence comparison.'),
 });

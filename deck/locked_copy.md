@@ -105,9 +105,8 @@ Scope: Four qualifying U.S. conversational offerings plus two selected internati
 CONVERSATIONAL AI IN COMMERCIAL INTELLIGENCE
 Commercial AI products extend conversational interaction into market intelligence, field decisions and simulated stakeholder research
 COMMERCIAL INTELLIGENCE — COMPETITIVE EXAMPLES
-U.S. screen: 3 company groups | 4 qualifying conversational AI offerings
 Pharmaceutical market and portfolio intelligence | IQVIA’s GMI Agent: global market insights; GBI Health’s GBI BOT (China): pharmaceutical database Q&A and competitive intelligence; Prospection’s ProGPT (Australia): conversational patient and market insights for brand planning | Market Clarity: market attractiveness and portfolio research
-Commercial field and prescribing decisions | IQVIA’s Field Force Agent: commercial field support; ZS’s ZAIDYN Conversational AI for Commercial: commercial information and decision support; Close-Up International’s Xplora AI (Argentina): AI-enabled pharmaceutical CRM and commercial intelligence | Market Clarity: patient and prescriber analytics
+Commercial field and prescribing decisions | IQVIA’s Field Force Agent: commercial field support; ZS’s ZAIDYN Conversational AI for Commercial: commercial information and decision support; Close-Up International’s Xplora AI (Spain): AI-enabled pharmaceutical CRM and commercial intelligence | Market Clarity: patient and prescriber analytics
 Simulated stakeholder research | Trinity Life Sciences’ InsightsEDGE Digital Twins: conversational simulated personas; Ipsos’s Healthcare PersonaBot (France): interaction with simulated healthcare stakeholders | Market Clarity provides market insights; a directly comparable simulated-persona offering was not established in the Optum review
 Which decisions are these products designed to support? What underlying commercial information can users access? Where does an assistant move beyond analytics into field execution or simulated research?
 TRANSITION TO OTHER WORKFLOWS
