@@ -12,21 +12,18 @@ The competitive significance of conversational AI depends on the customer task, 
 Evidence boundary: Public product marketing and announcements reviewed as of October 13, 2026. The findings describe selected screened inventories—not a market census, adoption rates, verified product performance or undisclosed capabilities.
 RESEARCH CATALYST
 Recent RWE product launches prompted a broader examination of conversational AI across life sciences
-A series of public announcements brought greater attention to natural-language access to healthcare data, cohort exploration and research workflows.
 SELECTED PUBLIC PRODUCT ANNOUNCEMENTS
 2024 — Earlier precedents
-February: Tempus One / Lens — AI-assisted research and cohort exploration
-September: Komodo MapAI — conversational healthcare analytics
+Tempus’s Tempus One / Lens — AI-assisted research and cohort exploration (February)
+Komodo Health’s MapAI — conversational healthcare analytics (September)
 August 2025 — Platform expansion
-Komodo Marmot — AI-powered healthcare analytics and research workflows
+Komodo Health’s Marmot — AI-powered healthcare analytics and research workflows
 April–May 2026 — Research-interface launches
-Truveta Intelligence — natural-language RWE research questions
-Flatiron Telescope — conversational oncology cohort exploration
+Truveta’s Truveta Intelligence — natural-language RWE research questions
+Flatiron Health’s Telescope — conversational oncology cohort exploration
 September 2026 — New releases
-Verana Agent Claire — conversational specialty-data research
-Norstella Atlas Patient Analytics — agentic, managed cohort analytics
-BROADER COMPETITIVE SIGNAL
-AI model providers are actively expanding enterprise sales into life sciences, offering models, integrations and implementation partnerships that may accelerate AI adoption among established healthcare-data vendors.
+Verana Health’s Agent Claire — conversational specialty-data research
+Norstella’s Atlas Patient Analytics — agentic, managed cohort analytics
 THE BROADER COMPETITIVE QUESTION
 Where else are life sciences vendors marketing conversational AI, what tasks does it serve, and how does that positioning compare with Optum Life Sciences?
 OUR RESEARCH RESPONSE
@@ -84,11 +81,11 @@ Selected country/region screens differ in research depth and company composition
 CONVERSATIONAL AI IN RWE
 Competitors are marketing conversational tools to assess healthcare datasets, explore cohorts and answer RWE questions
 RWE DATA ACCESS AND ANALYSIS — COMPETITIVE EXAMPLES
-CUSTOMER TASK | COMPETITOR CONVERSATIONAL AI OFFERINGS | RELEVANT OPTUM OFFERINGS
+CUSTOMER TASK | CONVERSATIONAL AI OFFERINGS | RELEVANT OPTUM OFFERINGS
 Identify and assess suitable data | Merative’s MarketScan Snapshot: natural-language assessment of dataset suitability; HealthVerity’s eXOs: conversational exploration of connected healthcare data | Market Clarity Data; linked claims/EHR data; Enriched Clinical Data
 Explore patient populations and cohorts | Komodo Health’s Marmot and MapAI: conversational healthcare analytics and cohort exploration; Truveta’s Truveta Intelligence: natural-language research questions over longitudinal clinical data; Briya’s AIRE Population Agent (Israel): natural-language cohort eligibility and feasibility assessment | Analytics on Demand; Clinical Notes Lab; Prospector
 Investigate broader RWE questions | Norstella’s Ella AI: conversational RWE analytics; BC Platforms’ BC Catalyst (Finland): prompt-based cohort building and clinical/genomic research exploration | Analytics on Demand; epidemiology research services
-QUESTIONS FOR COMPARISON
+BEYOND THE PUBLIC EVIDENCE
 What information can researchers query directly? What outputs can they generate, inspect and reuse? Where do dataset permissions, cohort definitions or specialist involvement constrain the experience?
 EVIDENCE BOUNDARY
 Scope: Six qualifying U.S. conversational offerings plus two selected international examples. Optum offerings are task-level comparators, not established conversational equivalents. Descriptions reflect public marketing, not independently verified performance or data access.
@@ -121,8 +118,9 @@ Question and navigate regulated documents | Veeva's Vault AI Chat: questions, su
 Which offerings help users find evidence, and which help them interpret or act on it? What source traceability, permissions and scientific review are built into the marketed experience? Where are these fundamentally different services?
 Evidence boundary: Three qualifying U.S. offerings plus one selected Spanish example. The examples span distinct tasks; scientific research, medical education, document assistance and pharmacovigilance are not interchangeable. Optum comparisons reflect publicly marketed capabilities, not verified conversational equivalence.
 CONVERSATIONAL AI IN CLINICAL TRIALS AND MARKET ACCESS
-Conversational offerings address specific trial operations and pricing questions—not the entire clinical or market-access workflow
-TWO DISTINCT WORKFLOWS — COMPETITIVE EXAMPLES
+Conversational offerings address specific trial operations and pricing questions, not the entire clinical or market-access workflow
+CLINICAL TRIALS — COMPETITIVE EXAMPLES
+MARKET ACCESS — COMPETITIVE EXAMPLES
 Trial feasibility, site and investigator identification | TriNetX's Terrain AI Assistant: natural-language questions about trial sites, investigator experience and patient populations | Prospector Data Mining Studio; Optum Digital Research Network
 Clinical-trial document operations | Taimei's Wiz-iCTA (China): conversational assistant supporting trial project teams and document-management work | Optum True Source supports clinical-trial source-data capture; a directly equivalent document assistant was not established
 Pharmaceutical pricing and market-access intelligence | EVERSANA's Ask NAVLIN: conversational access to pricing, reimbursement and market-access information | Optum HEOR and value evidence; Evidence Engine; health economic and budget impact modeling

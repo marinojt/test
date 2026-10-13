@@ -228,17 +228,21 @@ function footnote(s, runs, y) {
 }
 const ebLabel = text => [B('EVIDENCE BOUNDARY  ', { italic: false, charSpacing: 1 }), R(text)];
 
-// Three-column task table (Slides 5–9): returns bottom y
+// Three-column task table (Slides 5–10). rowHeights() measures without drawing.
+const TT_COLW = [2.5, 6.3, 3.33];
+const estH = (str, w, f) => lines(str, Math.floor((w - 0.24) / (f * 0.0062))) * f * 1.22 / 72;
+function rowHeights(rows, opt = {}) {
+  const colW = opt.colW || TT_COLW, fs = opt.fontSize || 9.5;
+  return rows.map(([task, comp, optum]) => Math.max(estH(task, colW[0], 11.5), comp.reduce((n, c) => n + estH(c, colW[1], fs), 0) + (comp.length - 1) * 0.06, estH(optum, colW[2], fs)) + 0.2 + (opt.rowPad || 0));
+}
+const TT_HEAD = 0.36;
 function taskTable(s, y, rows, opt = {}) {
-  const colW = opt.colW || [2.5, 6.3, 3.33], fs = opt.fontSize || 9.5;
-  const est = (str, w, f) => lines(str, Math.floor((w - 0.24) / (f * 0.0062))) * f * 1.22 / 72;
+  const colW = opt.colW || TT_COLW, fs = opt.fontSize || 9.5;
   const none = { type: 'none' }, hair = { type: 'solid', pt: 0.75, color: HEX.neutral }, white = { type: 'solid', pt: 2, color: HEX.white };
   const hd = { fill: { color: COL.navy }, color: COL.white, bold: true, fontSize: 9, valign: 'middle', charSpacing: 1, border: [none, none, none, none] };
-  const head = (opt.head || ['CUSTOMER TASK', 'COMPETITOR CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS']).map(t => ({ text: t, options: Object.assign({}, hd, opt.headAlign ? { align: opt.headAlign } : {}) }));
-  const rowH = [0.36];
+  const head = (opt.head || ['CUSTOMER TASK', 'CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS']).map(t => ({ text: t, options: Object.assign({}, hd, opt.headAlign ? { align: opt.headAlign } : {}) }));
+  const rowH = [TT_HEAD, ...rowHeights(rows, opt)];
   const body = rows.map(([task, comp, optum], i) => {
-    const h = Math.max(est(task, colW[0], 11.5), comp.reduce((n, c) => n + est(c, colW[1], fs), 0) + (comp.length - 1) * 0.06, est(optum, colW[2], fs)) + 0.2 + (opt.rowPad || 0);
-    rowH.push(h);
     const bot = opt.groupAfter === i ? { type: 'solid', pt: 1.5, color: HEX.navy } : hair;
     return [
       { text: task, options: { fill: { color: opt.taskFill ? opt.taskFill(i) : COL.tint }, color: opt.taskColor ? opt.taskColor(i) : COL.navy, bold: true, fontSize: 10.5, valign: 'middle', align: opt.taskAlign || 'left', border: [white, white, white, none] } },
@@ -249,16 +253,27 @@ function taskTable(s, y, rows, opt = {}) {
   s.addTable([head, ...body], { x: L, y, w: W, colW, rowH, margin: [0.07, 0.12, 0.07, 0.12], objectName: 'task table' });
   return y + rowH.reduce((a, b) => a + b, 0);
 }
-// Row of white cards with orange labels under a table
-function cardRow(s, y, items, bottom = 6.18, compact = false) {
-  const gap = 0.2, w = (W - gap * (items.length - 1)) / items.length, h = bottom - y;
-  items.forEach(([lab, runs, o], i) => {
-    const x = L + i * (w + gap);
+// Cards with an orange label + text; the label/text group is vertically centered in each card.
+const runText = t => (typeof t === 'string' ? [t] : t.reduce((ps, r) => { ps[ps.length - 1] += r.text; if (r.options && r.options.breakLine) ps.push(''); return ps; }, ['']));
+function cardMetrics(items, w, fs) {
+  return items.map(([lab, runs]) => {
+    const lh = Math.ceil(lab.length * 0.092 / (w - 0.44)) * 0.19 + 0.03;
+    const cpl = Math.floor((w - 0.44) / (fs * 0.0075));
+    const ps = runText(runs);
+    const th = ps.reduce((n, p) => n + Math.max(1, Math.ceil(p.length / cpl)), 0) * fs * 1.22 / 72 + (ps.length - 1) * 0.08;
+    return { lh, th, group: lh + 0.08 + th };
+  });
+}
+const cardWidth = n => (W - 0.2 * (n - 1)) / n;
+const cardsHeight = (items, fs = 10.5) => Math.max(...cardMetrics(items, cardWidth(items.length), fs).map(m => m.group)) + 0.4;
+function cardRow(s, y, bottom, items, fs = 10.5) {
+  const w = cardWidth(items.length), h = bottom - y, ms = cardMetrics(items, w, fs);
+  items.forEach(([lab, runs], i) => {
+    const x = L + i * (w + 0.2), m = ms[i], gy = y + (h - m.group) / 2;
     card(s, x, y, w, h, lab.toLowerCase() + ' card');
-    const lh = Math.ceil(lab.length * 0.092 / (w - 0.44)) * 0.2 + 0.04;
-    const ly = compact ? 0.1 : 0.15, gap2 = compact ? 0.02 : 0.09;
-    tx(s, lab, { x: x + 0.22, y: y + ly, w: w - 0.44, h: lh, fontSize: 10, bold: true, color: COL.orange, charSpacing: 1, objectName: 'label' });
-    tx(s, runs, Object.assign({ x: x + 0.22, y: y + ly + gap2 + lh, w: w - 0.44, h: h - ly - gap2 - lh - 0.05, fontSize: compact ? 10.5 : 11 }, o || {}));
+    tx(s, lab, { x: x + 0.22, y: gy, w: w - 0.44, h: m.lh, fontSize: 10, bold: true, color: COL.orange, charSpacing: 1, objectName: 'label' });
+    const body = typeof runs === 'string' ? [B(runs)] : runs.map(r => ({ text: r.text, options: Object.assign({}, r.options, { bold: true }) }));
+    tx(s, body, { x: x + 0.22, y: gy + m.lh + 0.08, w: w - 0.44, h: m.th + 0.06, fontSize: fs });
   });
 }
 const sectionLabel = (s, t, y, right) => {
@@ -271,40 +286,31 @@ async function slide2() {
   const s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: 'Research catalyst' });
   s.addText('RESEARCH CATALYST', { placeholder: 'kicker' });
   s.addText('Recent RWE product launches prompted a broader examination of conversational AI across life sciences', { placeholder: 'title' });
-  tx(s, 'A series of public announcements brought greater attention to natural-language access to healthcare data, cohort exploration and research workflows.', { x: L, y: 1.52, w: W, h: 0.25, fontSize: 12 });
 
-  label(s, 'SELECTED PUBLIC PRODUCT ANNOUNCEMENTS', L, 1.92, 8);
+  label(s, 'SELECTED PUBLIC PRODUCT ANNOUNCEMENTS', L, 1.68, 8);
   const ms = [
-    ['2024', 'Earlier precedents', ['**February:** Tempus One / Lens — AI-assisted research and cohort exploration', '**September:** Komodo MapAI — conversational healthcare analytics']],
-    ['August 2025', 'Platform expansion', ['**Komodo Marmot** — AI-powered healthcare analytics and research workflows']],
-    ['April–May 2026', 'Research-interface launches', ['**Truveta Intelligence** — natural-language RWE research questions', '**Flatiron Telescope** — conversational oncology cohort exploration']],
-    ['September 2026', 'New releases', ['**Verana Agent Claire** — conversational specialty-data research', '**Norstella Atlas Patient Analytics** — agentic, managed cohort analytics']],
+    ['2024', 'Earlier precedents', ['Tempus’s **Tempus One / Lens** — AI-assisted research and cohort exploration (February)', 'Komodo Health’s **MapAI** — conversational healthcare analytics (September)']],
+    ['August 2025', 'Platform expansion', ['Komodo Health’s **Marmot** — AI-powered healthcare analytics and research workflows']],
+    ['April–May 2026', 'Research-interface launches', ['Truveta’s **Truveta Intelligence** — natural-language RWE research questions', 'Flatiron Health’s **Telescope** — conversational oncology cohort exploration']],
+    ['September 2026', 'New releases', ['Verana Health’s **Agent Claire** — conversational specialty-data research', 'Norstella’s **Atlas Patient Analytics** — agentic, managed cohort analytics']],
   ];
-  const colw = W / 4, ly = 2.86;
+  const colw = W / 4, ly = 2.68;
   s.addShape(pres.shapes.LINE, { x: L, y: ly, w: W, h: 0, line: { color: COL.navy, width: 1.5 }, objectName: 'timeline' });
   ms.forEach(([date, sub, items], i) => {
     const x = L + i * colw;
-    tx(s, date, { x, y: 2.2, w: colw - 0.2, h: 0.3, fontSize: 15, bold: true, color: COL.navy });
-    tx(s, sub, { x, y: 2.5, w: colw - 0.2, h: 0.22, fontSize: 10, color: COL.muted, italic: true });
+    tx(s, date, { x, y: 2.0, w: colw - 0.2, h: 0.3, fontSize: 15, bold: true, color: COL.navy });
+    tx(s, sub, { x, y: 2.3, w: colw - 0.2, h: 0.22, fontSize: 10, color: COL.muted, italic: true });
     s.addShape(pres.shapes.OVAL, { x, y: ly - 0.09, w: 0.18, h: 0.18, fill: { color: i === 3 ? COL.orange : COL.navy }, line: { color: COL.canvas, width: 1.5 }, objectName: 'milestone' });
-    // Norstella is excluded from the conversational count (see evidence boundary) — shown muted
-    const runs = [];
-    items.forEach((it, j) => {
-      const r = rich(it, /Norstella/.test(it) ? { color: COL.muted } : {});
-      if (j < items.length - 1) r[r.length - 1].options.breakLine = true;
-      if (j > 0) r[0].options.paraSpaceBefore = 6;
-      runs.push(...r);
-    });
-    tx(s, runs, { x, y: 3.05, w: colw - 0.25, h: 1.15, fontSize: 10 });
+    tx(s, paras(items, {}, false).map((r, j) => (j && r.text.startsWith('Komodo') || j && /^(Flatiron|Norstella)/.test(r.text) ? { text: r.text, options: Object.assign({}, r.options, { paraSpaceBefore: 8 }) } : r)),
+      { x, y: 2.86, w: colw - 0.25, h: 1.5, fontSize: 10.5 });
   });
 
-  const cy = 4.38;
   const items = [
-    ['BROADER COMPETITIVE SIGNAL', 'AI model providers are actively expanding enterprise sales into life sciences, offering models, integrations and implementation partnerships that may accelerate AI adoption among established healthcare-data vendors.'],
-    ['THE BROADER COMPETITIVE QUESTION', [B('Where else are life sciences vendors marketing conversational AI, what tasks does it serve, and how does that positioning compare with Optum Life Sciences?', { color: COL.navy })]],
+    ['THE BROADER COMPETITIVE QUESTION', [{ text: 'Where else are life sciences vendors marketing conversational AI, what tasks does it serve, and how does that positioning compare with Optum Life Sciences?', options: { color: COL.navy } }]],
     ['OUR RESEARCH RESPONSE', 'Expand beyond RWE to assess publicly marketed conversational AI across five Optum-aligned decision workflows, prioritizing the U.S. competitive landscape and using selected international offerings for context.'],
   ];
-  cardRow(s, cy, items.map(([a, b]) => [a, b]), 6.12);
+  const bottom = 6.1, top = Math.min(4.3, bottom - cardsHeight(items, 12) - 0.1);
+  cardRow(s, top, bottom, items, 12);
   footnote(s, 'Evidence boundary: Dates reflect selected public announcements or releases, not necessarily first feature availability. The timeline illustrates a research catalyst, not measured market-wide growth. AI-enabled or agentic launches are not automatically qualifying conversational products; the Norstella example is excluded from the final conversational count.', 6.24);
 }
 
@@ -358,16 +364,25 @@ async function slide4() {
 }
 
 // ---------- SLIDES 5–9 — workflow task tables ----------
+// Bottom cards are sized to their content; spare height goes into table row padding.
+const QL = 'BEYOND THE PUBLIC EVIDENCE';
 async function workflowSlide(o) {
   const s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: o.section });
   s.addText(o.kicker, { placeholder: 'kicker' });
   tracker(s, o.active);
   s.addText(o.title, { placeholder: 'title' });
-  sectionLabel(s, o.label, 1.62, o.counts);
-  const bottom = taskTable(s, 1.92, o.rows, o.table || {});
-  const c = o.compact;
-  cardRow(s, bottom + (c ? 0.14 : 0.2), o.cards, c ? 6.26 : 6.18, !!c);
-  footnote(s, o.eb, c ? 6.36 : 6.3);
+  const topt = Object.assign({ headAlign: 'center', taskAlign: 'center', plainCountry: true }, o.table || {});
+  const tables = o.tables || [{ label: o.label, rows: o.rows }];
+  const LBL = 0.3, TGAP = 0.16, top = 1.62, cardBottom = 6.24;
+  const cardTop = cardBottom - cardsHeight(o.cards);
+  const natural = tables.reduce((n, t) => n + LBL + TT_HEAD + rowHeights(t.rows, topt).reduce((a, b) => a + b, 0), 0) + TGAP * (tables.length - 1);
+  const nRows = tables.reduce((n, t) => n + t.rows.length, 0);
+  const pad = Math.max(0, Math.min(0.4, (cardTop - 0.2 - top - natural) / nRows));
+  let y = top;
+  tables.forEach(t => { sectionLabel(s, t.label, y, t.counts); y = taskTable(s, y + LBL, t.rows, Object.assign({}, topt, { rowPad: pad })) + TGAP; });
+  const ct = Math.max(cardTop, y - TGAP + 0.18);
+  cardRow(s, ct, cardBottom, o.cards);
+  footnote(s, o.eb, 6.34);
   return s;
 }
 const slide5 = () => workflowSlide({
@@ -379,7 +394,7 @@ const slide5 = () => workflowSlide({
     ['Explore patient populations and cohorts', ['Komodo Health’s **Marmot** and **MapAI**: conversational healthcare analytics and cohort exploration;', 'Truveta’s **Truveta Intelligence**: natural-language research questions over longitudinal clinical data;', 'Briya’s **AIRE Population Agent** (Israel): natural-language cohort eligibility and feasibility assessment'], 'Analytics on Demand; Clinical Notes Lab; Prospector'],
     ['Investigate broader RWE questions', ['Norstella’s **Ella AI**: conversational RWE analytics;', 'BC Platforms’ **BC Catalyst** (Finland): prompt-based cohort building and clinical/genomic research exploration'], 'Analytics on Demand; epidemiology research services'],
   ],
-  cards: [['QUESTIONS FOR COMPARISON', 'What information can researchers query directly? What outputs can they generate, inspect and reuse? Where do dataset permissions, cohort definitions or specialist involvement constrain the experience?']],
+  cards: [[QL, 'What information can researchers query directly? What outputs can they generate, inspect and reuse? Where do dataset permissions, cohort definitions or specialist involvement constrain the experience?']],
   eb: ebLabel('Scope: Six qualifying U.S. conversational offerings plus two selected international examples. Optum offerings are task-level comparators, not established conversational equivalents. Descriptions reflect public marketing, not independently verified performance or data access.'),
 });
 const slide6 = () => workflowSlide({
@@ -393,7 +408,7 @@ const slide6 = () => workflowSlide({
   ],
   cards: [
     ['WHERE DOES CONVERSATIONAL ANALYSIS END AND SCIENTIFIC EVIDENCE GENERATION BEGIN?', 'Optum also markets epidemiology studies and Evidence Engine services. The conversational products above are not automatically equivalent to those scientific services.'],
-    ['QUESTIONS FOR COMPARISON', 'Which tools support exploratory questions versus reproducible study analyses? What supporting methods, provenance and review can customers inspect? Which capabilities are publicly demonstrated, and which require further validation?'],
+    [QL, 'Which tools support exploratory questions versus reproducible study analyses? What supporting methods, provenance and review can customers inspect? Which capabilities are publicly demonstrated, and which require further validation?'],
   ],
   eb: ebLabel('Scope: Four qualifying U.S. conversational offerings plus two selected international examples. Product descriptions are based on public marketing; study-grade reliability, data entitlements and actual deployment are not independently established.'),
 });
@@ -401,16 +416,14 @@ const slide7 = () => workflowSlide({
   section: 'Workflow deep dives', kicker: 'CONVERSATIONAL AI IN COMMERCIAL INTELLIGENCE', active: ['Commercial intelligence'],
   title: 'Commercial AI products extend conversational interaction into market intelligence, field decisions and simulated stakeholder research',
   label: 'COMMERCIAL INTELLIGENCE — COMPETITIVE EXAMPLES',
-  table: { head: ['CUSTOMER TASK', 'CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS'], headAlign: 'center', taskAlign: 'center', plainCountry: true, rowPad: 0.14 },
-  compact: true,
   rows: [
     ['Pharmaceutical market and portfolio intelligence', ['IQVIA’s **GMI Agent**: global market insights;', 'GBI Health’s **GBI BOT** (China): pharmaceutical database Q&A and competitive intelligence;', 'Prospection’s **ProGPT** (Australia): conversational patient and market insights for brand planning'], 'Market Clarity: market attractiveness and portfolio research'],
     ['Commercial field and prescribing decisions', ['IQVIA’s **Field Force Agent**: commercial field support;', 'ZS’s **ZAIDYN Conversational AI for Commercial**: commercial information and decision support;', 'Close-Up International’s **Xplora AI** (Spain): AI-enabled pharmaceutical CRM and commercial intelligence'], 'Market Clarity: patient and prescriber analytics'],
     ['Simulated stakeholder research', ['Trinity Life Sciences’ **InsightsEDGE Digital Twins**: conversational simulated personas;', 'Ipsos’s **Healthcare PersonaBot** (France): interaction with simulated healthcare stakeholders'], 'Market Clarity provides market insights; a directly comparable simulated-persona offering was not established in the Optum review'],
   ],
   cards: [
-    ['BEYOND THE PUBLIC EVIDENCE', 'Which decisions are these products designed to support? What underlying commercial information can users access? Where does an assistant move beyond analytics into field execution or simulated research?', { bold: true }],
-    ['TRANSITION TO OTHER WORKFLOWS', 'How does the comparison change for medical affairs, clinical development and market access, where the intended users, evidence requirements and decisions differ?', { bold: true }],
+    [QL, 'Which decisions are these products designed to support? What underlying commercial information can users access? Where does an assistant move beyond analytics into field execution or simulated research?'],
+    ['TRANSITION TO OTHER WORKFLOWS', 'How does the comparison change for medical affairs, clinical development and market access, where the intended users, evidence requirements and decisions differ?'],
   ],
   eb: ebLabel('Scope: All four qualifying U.S. commercial conversational offerings plus four selected international examples. Customer tasks are not interchangeable; Optum comparisons are based on public offerings, not feature-for-feature validation. International examples are illustrative, not a geographic prevalence comparison.'),
 });
@@ -423,20 +436,22 @@ const slide8 = () => workflowSlide({
     ['Explore medical insights and support scientific engagement', ["ZS's **ZAIDYN Conversational AI for Medical**: natural-language analysis of care gaps, scientific insights and opinion-leader information;", "Evidenze's **AI medical-education chatbots** (Spain): conversational medical education and knowledge support"], 'Market Clarity medical affairs evidence and MSL insights'],
     ['Question and navigate regulated documents', ["Veeva's **Vault AI Chat**: questions, summaries and follow-up interactions within authorized Vault documents and records"], "Optum's safety and evidence-research services are adjacent; a directly comparable document-chat offering was not established in the review"],
   ],
-  cards: [['QUESTIONS FOR COMPARISON', 'Which offerings help users find evidence, and which help them interpret or act on it? What source traceability, permissions and scientific review are built into the marketed experience? Where are these fundamentally different services?']],
+  cards: [[QL, 'Which offerings help users find evidence, and which help them interpret or act on it? What source traceability, permissions and scientific review are built into the marketed experience? Where are these fundamentally different services?']],
   eb: 'Evidence boundary: Three qualifying U.S. offerings plus one selected Spanish example. The examples span distinct tasks; scientific research, medical education, document assistance and pharmacovigilance are not interchangeable. Optum comparisons reflect publicly marketed capabilities, not verified conversational equivalence.',
 });
 const slide9 = () => workflowSlide({
   section: 'Workflow deep dives', kicker: 'CONVERSATIONAL AI IN CLINICAL TRIALS AND MARKET ACCESS', active: ['Clinical trials', 'Market access'],
-  title: 'Conversational offerings address specific trial operations and pricing questions—not the entire clinical or market-access workflow',
-  label: 'TWO DISTINCT WORKFLOWS — COMPETITIVE EXAMPLES',
-  table: { groupAfter: 1 },
-  rows: [
-    ['Trial feasibility, site and investigator identification', ["TriNetX's **Terrain AI Assistant**: natural-language questions about trial sites, investigator experience and patient populations"], 'Prospector Data Mining Studio; Optum Digital Research Network'],
-    ['Clinical-trial document operations', ["Taimei's **Wiz-iCTA** (China): conversational assistant supporting trial project teams and document-management work"], 'Optum True Source supports clinical-trial source-data capture; a directly equivalent document assistant was not established'],
-    ['Pharmaceutical pricing and market-access intelligence', ["EVERSANA's **Ask NAVLIN**: conversational access to pricing, reimbursement and market-access information"], 'Optum HEOR and value evidence; Evidence Engine; health economic and budget impact modeling'],
+  title: 'Conversational offerings address specific trial operations and pricing questions, not the entire clinical or market-access workflow',
+  tables: [
+    { label: 'CLINICAL TRIALS — COMPETITIVE EXAMPLES', rows: [
+      ['Trial feasibility, site and investigator identification', ["TriNetX's **Terrain AI Assistant**: natural-language questions about trial sites, investigator experience and patient populations"], 'Prospector Data Mining Studio; Optum Digital Research Network'],
+      ['Clinical-trial document operations', ["Taimei's **Wiz-iCTA** (China): conversational assistant supporting trial project teams and document-management work"], 'Optum True Source supports clinical-trial source-data capture; a directly equivalent document assistant was not established'],
+    ] },
+    { label: 'MARKET ACCESS — COMPETITIVE EXAMPLES', rows: [
+      ['Pharmaceutical pricing and market-access intelligence', ["EVERSANA's **Ask NAVLIN**: conversational access to pricing, reimbursement and market-access information"], 'Optum HEOR and value evidence; Evidence Engine; health economic and budget impact modeling'],
+    ] },
   ],
-  cards: [['QUESTIONS FOR COMPARISON', [
+  cards: [[QL, [
     R('For trials, does the interface help identify viable sites, evaluate patients or manage trial documents—and how far does it go?', { breakLine: true }),
     R('For market access, is the customer asking for pricing intelligence, reimbursement information or new economic evidence? Where do the vendor offerings overlap with Optum, and where do they solve a different problem?', { paraSpaceBefore: 6 }),
   ]]],
