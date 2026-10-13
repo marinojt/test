@@ -237,7 +237,7 @@ function taskTable(s, y, rows, opt = {}) {
   const head = (opt.head || ['CUSTOMER TASK', 'COMPETITOR CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS']).map(t => ({ text: t, options: Object.assign({}, hd, opt.headAlign ? { align: opt.headAlign } : {}) }));
   const rowH = [0.36];
   const body = rows.map(([task, comp, optum], i) => {
-    const h = Math.max(est(task, colW[0], 11.5), comp.reduce((n, c) => n + est(c, colW[1], fs), 0) + (comp.length - 1) * 0.06, est(optum, colW[2], fs)) + 0.2;
+    const h = Math.max(est(task, colW[0], 11.5), comp.reduce((n, c) => n + est(c, colW[1], fs), 0) + (comp.length - 1) * 0.06, est(optum, colW[2], fs)) + 0.2 + (opt.rowPad || 0);
     rowH.push(h);
     const bot = opt.groupAfter === i ? { type: 'solid', pt: 1.5, color: HEX.navy } : hair;
     return [
@@ -250,14 +250,15 @@ function taskTable(s, y, rows, opt = {}) {
   return y + rowH.reduce((a, b) => a + b, 0);
 }
 // Row of white cards with orange labels under a table
-function cardRow(s, y, items, bottom = 6.18) {
+function cardRow(s, y, items, bottom = 6.18, compact = false) {
   const gap = 0.2, w = (W - gap * (items.length - 1)) / items.length, h = bottom - y;
   items.forEach(([lab, runs, o], i) => {
     const x = L + i * (w + gap);
     card(s, x, y, w, h, lab.toLowerCase() + ' card');
     const lh = Math.ceil(lab.length * 0.092 / (w - 0.44)) * 0.2 + 0.04;
-    tx(s, lab, { x: x + 0.22, y: y + 0.15, w: w - 0.44, h: lh, fontSize: 10, bold: true, color: COL.orange, charSpacing: 1, objectName: 'label' });
-    tx(s, runs, Object.assign({ x: x + 0.22, y: y + 0.24 + lh, w: w - 0.44, h: h - 0.35 - lh, fontSize: 11 }, o || {}));
+    const ly = compact ? 0.1 : 0.15, gap2 = compact ? 0.02 : 0.09;
+    tx(s, lab, { x: x + 0.22, y: y + ly, w: w - 0.44, h: lh, fontSize: 10, bold: true, color: COL.orange, charSpacing: 1, objectName: 'label' });
+    tx(s, runs, Object.assign({ x: x + 0.22, y: y + ly + gap2 + lh, w: w - 0.44, h: h - ly - gap2 - lh - 0.05, fontSize: compact ? 10.5 : 11 }, o || {}));
   });
 }
 const sectionLabel = (s, t, y, right) => {
@@ -364,8 +365,9 @@ async function workflowSlide(o) {
   s.addText(o.title, { placeholder: 'title' });
   sectionLabel(s, o.label, 1.62, o.counts);
   const bottom = taskTable(s, 1.92, o.rows, o.table || {});
-  cardRow(s, bottom + 0.2, o.cards, 6.18);
-  footnote(s, o.eb, 6.3);
+  const c = o.compact;
+  cardRow(s, bottom + (c ? 0.14 : 0.2), o.cards, c ? 6.26 : 6.18, !!c);
+  footnote(s, o.eb, c ? 6.36 : 6.3);
   return s;
 }
 const slide5 = () => workflowSlide({
@@ -399,14 +401,15 @@ const slide7 = () => workflowSlide({
   section: 'Workflow deep dives', kicker: 'CONVERSATIONAL AI IN COMMERCIAL INTELLIGENCE', active: ['Commercial intelligence'],
   title: 'Commercial AI products extend conversational interaction into market intelligence, field decisions and simulated stakeholder research',
   label: 'COMMERCIAL INTELLIGENCE — COMPETITIVE EXAMPLES',
-  table: { head: ['CUSTOMER TASK', 'CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS'], headAlign: 'center', taskAlign: 'center', plainCountry: true },
+  table: { head: ['CUSTOMER TASK', 'CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM OFFERINGS'], headAlign: 'center', taskAlign: 'center', plainCountry: true, rowPad: 0.14 },
+  compact: true,
   rows: [
     ['Pharmaceutical market and portfolio intelligence', ['IQVIA’s **GMI Agent**: global market insights;', 'GBI Health’s **GBI BOT** (China): pharmaceutical database Q&A and competitive intelligence;', 'Prospection’s **ProGPT** (Australia): conversational patient and market insights for brand planning'], 'Market Clarity: market attractiveness and portfolio research'],
     ['Commercial field and prescribing decisions', ['IQVIA’s **Field Force Agent**: commercial field support;', 'ZS’s **ZAIDYN Conversational AI for Commercial**: commercial information and decision support;', 'Close-Up International’s **Xplora AI** (Spain): AI-enabled pharmaceutical CRM and commercial intelligence'], 'Market Clarity: patient and prescriber analytics'],
     ['Simulated stakeholder research', ['Trinity Life Sciences’ **InsightsEDGE Digital Twins**: conversational simulated personas;', 'Ipsos’s **Healthcare PersonaBot** (France): interaction with simulated healthcare stakeholders'], 'Market Clarity provides market insights; a directly comparable simulated-persona offering was not established in the Optum review'],
   ],
   cards: [
-    ['QUESTIONS FOR COMPARISON', 'Which decisions are these products designed to support? What underlying commercial information can users access? Where does an assistant move beyond analytics into field execution or simulated research?', { bold: true }],
+    ['BEYOND THE PUBLIC EVIDENCE', 'Which decisions are these products designed to support? What underlying commercial information can users access? Where does an assistant move beyond analytics into field execution or simulated research?', { bold: true }],
     ['TRANSITION TO OTHER WORKFLOWS', 'How does the comparison change for medical affairs, clinical development and market access, where the intended users, evidence requirements and decisions differ?', { bold: true }],
   ],
   eb: ebLabel('Scope: All four qualifying U.S. commercial conversational offerings plus four selected international examples. Customer tasks are not interchangeable; Optum comparisons are based on public offerings, not feature-for-feature validation. International examples are illustrative, not a geographic prevalence comparison.'),
