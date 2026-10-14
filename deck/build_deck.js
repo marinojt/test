@@ -71,27 +71,28 @@ async function slide1() {
   title(s, 'Conversational AI is being marketed across life sciences workflows, creating|new ways to access information, analytics and decision support');
 
   // Outside-in research lens (full width) with the five workflows as chips
-  const ly = 1.68, lh = 1.5;
+  const ly = 1.68, lh = 1.68;
   card(s, L, ly, W, lh, 'lens card');
   await iconDot(s, 'MdTravelExplore', L + 0.25, ly + 0.22, 0.52);
   cardLabel(s, 'OUTSIDE-IN RESEARCH LENS', L + 0.95, ly + 0.2, 6);
-  tx(s, [B('This study is an assessment of '), B('publicly-marketed', { color: COL.navy }), B(' conversational AI products across five Optum Life Sciences-relevant business domains.')], { x: L + 0.95, y: ly + 0.56, w: 10.9, h: 0.22, fontSize: 11 });
+  tx(s, [B('This study is an assessment of '), B('publicly-marketed', { color: COL.orange }), B(' conversational AI products across five Optum Life Sciences-relevant business domains:')], { x: L + 0.95, y: ly + 0.56, w: 10.9, h: 0.22, fontSize: 11 });
   let x = L + 0.95; const chy = ly + 0.86;
-  for (const t of WF) {
+  for (const [i, t] of WF.entries()) {
+    if (i === 4) { tx(s, 'and', { x, y: chy, w: 0.34, h: 0.27, fontSize: 10, color: COL.muted, align: 'center', valign: 'middle' }); x += 0.4; }
     x += chip(s, t, x, chy, { h: 0.27, fontSize: 9.5 }) + 0.1;
   }
   tx(s, 'The U.S. competitive landscape is the primary focus; selected international offerings provide context; and Optum LS is the strategic reference point.', { x: L + 0.95, y: ly + 1.22, w: 10.9, h: 0.22, fontSize: 11 });
 
-  const cy = 3.32, ch = 2.85, cw = 3.91, gap = 0.2;
+  const cy = 3.52, ch = 3.1, cw = 3.91, gap = 0.2;
   const cx = [L, L + cw + gap, L + 2 * (cw + gap)];
   const head = async (i, ic, t) => { card(s, cx[i], cy, cw, ch, t.toLowerCase() + ' card'); await iconDot(s, ic, cx[i] + 0.25, cy + 0.22, 0.5); cardLabel(s, t, cx[i] + 0.88, cy + 0.32, cw - 1.0); };
 
   // Key findings — number and sentence share a top line and a fixed gutter
   await head(0, 'MdInsights', 'KEY FINDINGS');
-  const kf = [['19', [R('The U.S. screen identified 19 qualifying conversational AI offerings across five decision workflows, '), B('concentrated in RWE and commercial intelligence'), R('.')]],
-              ['10', 'The selected international comparison identified 10 qualifying offerings, providing additional examples of how vendors position conversational interaction.']];
+  const kf = [['19', [R('The U.S. screen identified '), B('19 conversational AI offerings'), R(' across five business domains, '), B('concentrated in RWE and Commercial Intelligence'), R('.')]],
+              ['10', [R('The selected international comparison identified '), B('10 conversational AI offerings,'), R(' providing additional examples of how vendors position conversational interaction.')]]];
   kf.forEach(([n, t], i) => {
-    const y = cy + 0.95 + i * 0.98;
+    const y = cy + 1.0 + i * 1.08;
     if (i) s.addShape(pres.shapes.LINE, { x: cx[0] + 0.25, y: y - 0.12, w: cw - 0.5, h: 0, line: { color: COL.neutral, width: 0.75 } });
     tx(s, n, { x: cx[0] + 0.25, y: y - 0.07, w: 0.68, h: 0.55, fontSize: 34, bold: true, color: COL.orange, objectName: 'hero ' + n });
     tx(s, t, { x: cx[0] + 0.98, y, w: cw - 1.2, h: 0.82, fontSize: 10.5 });
@@ -109,11 +110,9 @@ async function slide1() {
   await head(2, 'MdOutlineLightbulb', 'STRATEGIC IMPLICATION');
   tx(s, 'The competitive significance of conversational AI depends on the customer task, underlying data and reliability of the results.',
     { x: cx[2] + 0.25, y: cy + 0.95, w: cw - 0.5, h: 0.75, fontSize: 11 });
-  tx(s, "Where could conversational interaction add value to Optum's existing offerings?",
+  tx(s, "Where could conversational interaction add value to Optum LS's existing offerings?",
     { x: cx[2] + 0.25, y: cy + 1.75, w: cw - 0.5, h: 0.95, fontSize: 14, bold: true, color: COL.navy, objectName: 'strategic question' });
 
-  tx(s, 'Evidence boundary: Public product marketing and announcements reviewed as of October 13, 2026. The findings describe selected screened inventories—not a market census, adoption rates, verified product performance or undisclosed capabilities.',
-    { x: L, y: 6.3, w: W, h: 0.4, fontSize: 9, italic: true, color: COL.muted, objectName: 'evidence boundary' });
 }
 
 // ---------- SLIDE 3 — U.S. COMPETITIVE LANDSCAPE ----------
@@ -123,20 +122,20 @@ async function slide3() {
   title(s, 'Among U.S. competitors, conversational AI is most prominent in RWE; Optum LS has relevant offerings in all five domains');
 
   // U.S. competitive screen — KPI tiles linked by arrows
-  const tiles = [['45', 'competitor groups initially screened'], ['15', 'distinct groups marketing qualifying conversational AI'], ['19', 'qualifying conversational AI offerings across five decision workflows']];
-  const aw = 0.62, tw = (W - 2 * aw) / 3, ty = 1.66, th = 0.6;
-  tiles.forEach(([n, t], i) => {
-    const x = L + i * (tw + aw);
+  const tiles = [['45', 'competitors screened', COL.navy], ['17', 'competitors who market conversational AI', COL.orange]];
+  const aw = 0.8, tw = (W - aw) / 2, ty = 1.66, th = 0.6;
+  tiles.forEach(([n, t, c], i) => {
+    const x = L + i * (tw + aw), nw = 0.46, tww = t.length * 0.085 + 0.1, gx = x + (tw - (nw + 0.12 + tww)) / 2;
     s.addShape(pres.shapes.RECTANGLE, { x, y: ty, w: tw, h: th, fill: { color: COL.tint }, line: { type: 'none' }, objectName: 'kpi tile ' + n });
-    tx(s, n, { x: x + 0.2, y: ty, w: 0.6, h: th, fontSize: 26, bold: true, color: i === 2 ? COL.orange : COL.navy, valign: 'middle' });
-    tx(s, t, { x: x + 0.85, y: ty, w: tw - 0.97, h: th, fontSize: 10.5, bold: true, color: COL.navy, valign: 'middle' });
-    if (i < 2) s.addShape(pres.shapes.RIGHT_ARROW, { x: x + tw + 0.14, y: ty + th / 2 - 0.13, w: aw - 0.28, h: 0.26, fill: { color: COL.muted }, line: { type: 'none' }, objectName: 'flow arrow' });
+    tx(s, n, { x: gx, y: ty, w: nw, h: th, fontSize: 26, bold: true, color: c, align: 'right', valign: 'middle' });
+    tx(s, t, { x: gx + nw + 0.12, y: ty, w: tww, h: th, fontSize: 11, bold: true, color: COL.navy, valign: 'middle' });
+    if (i === 0) s.addShape(pres.shapes.RIGHT_ARROW, { x: x + tw + 0.2, y: ty + th / 2 - 0.13, w: aw - 0.4, h: 0.26, fill: { color: COL.muted }, line: { type: 'none' }, objectName: 'flow arrow' });
   });
 
   // Competitor coverage and Optum LS positioning — mirrored chart + table
   label(s, 'COMPETITOR COVERAGE AND OPTUM LS POSITIONING', L, 2.44, 7);
   const rows = [
-    ['RWE', 9, 34, 'Komodo Marmot and MapAI; Truveta Intelligence; Flatiron Telescope; Tempus Lens', 'Analytics on Demand; epidemiology research'],
+    ['RWE', 9, 34, 'Komodo Marmot and MapAI; Truveta Intelligence; Flatiron Telescope; Tempus Lens; and more', 'Analytics on Demand; epidemiology research'],
     ['Commercial Intelligence', 3, 23, 'IQVIA Field Force Agent and GMI Agent; ZS Conversational AI for Commercial; Trinity InsightsEDGE Digital Twins', 'Market Clarity: portfolio and patient/prescriber analytics'],
     ['Medical / Regulatory Research', 3, 18, 'IQVIA Med-R1; ZS Conversational AI for Medical; Veeva Vault AI Chat', 'Postapproval safety studies; Market Clarity medical affairs insights'],
     ['Clinical Trials', 1, 25, 'TriNetX Terrain AI Assistant', 'Prospector; Digital Research Network; True Source'],
@@ -166,7 +165,7 @@ async function slide3() {
   rows.forEach(([wf, n, d, rep, opt], i) => {
     const y = ry + i * rh;
     const barLeft = chartX + chartW * (1 - d / maxV);
-    tx(s, [B(`${n}`, { color: COL.navy }), R(` / ${d}`)], { x: barLeft - 0.66, y, w: 0.6, h: rh, fontSize: 10, align: 'right', valign: 'middle', objectName: 'fraction ' + wf });
+    tx(s, [B(`${n}`, { color: COL.orange }), R(` / ${d}`)], { x: barLeft - 0.66, y, w: 0.6, h: rh, fontSize: 10, align: 'right', valign: 'middle', objectName: 'fraction ' + wf });
     chip(s, wf, cX.wf + 0.08, y + (rh - 0.34) / 2, { w: cW.wf - 0.16, h: 0.34, fontSize: 9 });
     tx(s, rep, { x: cX.rep + 0.1, y, w: cW.rep - 0.2, h: rh, fontSize: 9, valign: 'middle' });
     tx(s, opt, { x: cX.opt + 0.1, y, w: cW.opt - 0.2, h: rh, fontSize: 9, valign: 'middle' });
@@ -182,8 +181,8 @@ async function slide3() {
   const ky = 6.12, kh = 0.6;
   card(s, L, ky, W, kh, 'key takeaway card');
   tx(s, 'KEY TAKEAWAY', { x: L + 0.2, y: ky, w: 2.1, h: kh, fontSize: 13, bold: true, color: COL.orange, charSpacing: 1.5, valign: 'middle', objectName: 'label' });
-  tx(s, [B('A publicly-marketed customer-facing conversational interface was not established in the reviewed materials for Optum LS across the five relevant business domains.')],
-    { x: L + 1.95, y: ky, w: W - 2.15, h: kh, fontSize: 10.5, valign: 'middle' });
+  tx(s, [B('A publicly-marketed customer-facing conversational interface was not established in the reviewed materials for Optum LS', { breakLine: true }), B('across the five relevant business domains.')],
+    { x: L + 2.6, y: ky, w: W - 2.8, h: kh, fontSize: 10.5, valign: 'middle' });
 }
 
 // ---------- shared helpers for slides 2, 4–11 ----------
@@ -241,7 +240,7 @@ function taskTable(s, y, rows, opt = {}) {
   const none = { type: 'none' }, hair = { type: 'solid', pt: 0.75, color: HEX.neutral }, white = { type: 'solid', pt: 2, color: HEX.white };
   const hd = { fill: { color: COL.navy }, color: COL.white, bold: true, fontSize: 9, valign: 'middle', charSpacing: 1, border: [none, none, none, none] };
   const head = (opt.head || ['CUSTOMER TASK', 'CONVERSATIONAL AI OFFERINGS', 'RELEVANT OPTUM LS OFFERINGS']).map(t => ({ text: t, options: Object.assign({}, hd, opt.headAlign ? { align: opt.headAlign } : {}) }));
-  const rowH = [TT_HEAD, ...rowHeights(rows, opt)];
+  const rowH = [opt.headH || TT_HEAD, ...rowHeights(rows, opt)];
   const body = rows.map(([task, comp, optum], i) => {
     const bot = opt.groupAfter === i ? { type: 'solid', pt: 1.5, color: HEX.navy } : hair;
     return [
@@ -310,9 +309,8 @@ async function slide2() {
     ['THE BROADER COMPETITIVE QUESTION', [{ text: 'Where else are life sciences vendors marketing conversational AI, what tasks does it serve, and how does that positioning compare with Optum LS?', options: { color: COL.navy } }]],
     ['OUR RESEARCH RESPONSE', 'Expand beyond RWE to assess publicly-marketed conversational AI across five Optum LS-aligned domains, prioritizing the U.S. competitive landscape and using selected international offerings for context.'],
   ];
-  const bottom = 6.1, top = Math.min(4.3, bottom - cardsHeight(items, 12) - 0.1);
+  const bottom = 6.6, top = Math.min(4.5, bottom - cardsHeight(items, 12) - 0.1);
   cardRow(s, top, bottom, items, 12);
-  footnote(s, 'Evidence boundary: Dates reflect selected public announcements or releases, not necessarily first feature availability. The timeline illustrates a research catalyst, not measured market-wide growth. AI-enabled or agentic launches are not automatically qualifying conversational products; the Norstella example is excluded from the final conversational count.', 6.24);
 }
 
 // ---------- SLIDE 4 — U.S. BASELINE AND INTERNATIONAL SCREENS ----------
@@ -331,7 +329,7 @@ async function slide4() {
   const pc = { x: usEnd + 0.12, w: L + cw - usEnd - 0.12 };
   s.addShape(pres.shapes.RECTANGLE, { x: L, y: hy, w: cw, h: hh, fill: { color: COL.navy }, line: { type: 'none' }, objectName: 'table header' });
   const hd = { y: hy, h: hh, fontSize: 9, bold: true, color: COL.white, valign: 'middle', align: 'center' };
-  tx(s, 'Screen', { ...hd, x: lab.x, w: lab.w });
+  tx(s, [R('International', { breakLine: true }), R('Screen')], { ...hd, x: lab.x, w: lab.w });
   tx(s, [R('Companies with conversational AI /', { breakLine: true }), R('Total comparable companies')], { ...hd, x: ch.x, w: usEnd - ch.x });
   tx(s, [R('Screened-', { breakLine: true }), R('company share')], { ...hd, x: pc.x, w: pc.w });
 
@@ -352,18 +350,19 @@ async function slide4() {
     tx(s, pct, { x: pc.x, y, w: pc.w, h: rh, fontSize: 9, bold: us, color: us ? COL.navy : COL.muted, align: 'center', valign: 'middle' });
   });
 
-  // Right panel
-  const rx = L + cw + 0.25, rw = W - cw - 0.25;
-  card(s, rx, hy, rw, 1.82, 'how to read card');
-  cardLabel(s, 'HOW TO READ THE COMPARISON', rx + 0.22, hy + 0.14, rw - 0.44);
+  // Right panel: each card's label + text is centered as a group; the arrow sits beside the NEXT label
+  const rx = L + cw + 0.25, rw = W - cw - 0.25, iw = rw - 0.44, lab13 = { fontSize: 13, bold: true, color: COL.orange, charSpacing: 1.5, objectName: 'label' };
+  const h1 = 1.95, l1 = 0.52, t1 = 0.9, g1 = hy + (h1 - (l1 + 0.1 + t1)) / 2;
+  card(s, rx, hy, rw, h1, 'how to read card');
+  tx(s, 'HOW TO READ THE COMPARISON', { ...lab13, x: rx + 0.22, y: g1, w: iw, h: l1 });
   tx(s, 'Each bar shows the share of comparable companies we screened that market conversational AI. International counts exclude competitors already represented in the U.S. inventory.',
-    { x: rx + 0.22, y: hy + 0.72, w: rw - 0.44, h: 1.0, fontSize: 10 });
-  const ny = hy + 2.0, nh = 6.68 - ny;
+    { x: rx + 0.22, y: g1 + l1 + 0.1, w: iw, h: t1, fontSize: 10 });
+  const ny = hy + h1 + 0.2, nh = 6.68 - ny, l2 = 0.8, t2 = 0.9, g2 = ny + (nh - (l2 + 0.16 + t2)) / 2;
   card(s, rx, ny, rw, nh, 'next card');
-  await iconDot(s, 'MdArrowForward', rx + 0.22, ny + nh / 2 - 0.95, 0.5);
-  cardLabel(s, 'NEXT: FROM COMPANY SCREENS TO ACTUAL PRODUCTS', rx + 0.22, ny + nh / 2 - 0.35, rw - 0.44);
+  await iconDot(s, 'MdArrowForward', rx + 0.22, g2 + l2 / 2 - 0.22, 0.44);
+  tx(s, 'NEXT: FROM COMPANY SCREENS TO ACTUAL PRODUCTS', { ...lab13, x: rx + 0.8, y: g2, w: iw - 0.58, h: l2, valign: 'middle' });
   tx(s, 'The following slides examine the specific marketed conversational tools and corresponding Optum LS offerings – beginning with RWE.',
-    { x: rx + 0.22, y: ny + nh / 2 + 0.3, w: rw - 0.44, h: 0.9, fontSize: 11.5, bold: true, color: COL.navy });
+    { x: rx + 0.22, y: g2 + l2 + 0.16, w: iw, h: t2, fontSize: 11.5, bold: true, color: COL.navy });
 }
 
 // ---------- SLIDES 5–9 — workflow task tables ----------
@@ -455,14 +454,11 @@ const slide9 = () => workflowSlide({
 // ---------- SLIDE 10 — AI SUPPLIERS ----------
 async function slide10() {
   const s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: 'AI suppliers' });
-  s.addText('AI SUPPLIERS EXPAND INTO LIFE SCIENCES', { placeholder: 'kicker' });
-  s.addText('AI technology providers are expanding into pharmaceutical workflows through partnerships, specialized offerings and acquisitions', { placeholder: 'title' });
-  label(s, 'A SECOND COMPETITIVE DYNAMIC', L, 1.55, 6);
-  tx(s, 'The preceding slides examine conversational AI products marketed by established life-sciences data, technology and services companies. At the same time, AI model and infrastructure providers are pursuing life-sciences customers through several distinct approaches—some complementary to incumbent platforms, others potentially competitive.',
-    { x: L, y: 1.8, w: W, h: 0.4, fontSize: 10 });
-  label(s, 'THREE OBSERVED APPROACHES TO ENTERING LIFE SCIENCES', L, 2.28, 8);
+  s.addText('ADDITIONAL COMPETITIVE DYNAMIC: AI SUPPLIERS EXPAND INTO LIFE SCIENCES', { placeholder: 'kicker' });
+  s.addText('Conversational AI providers are expanding into pharmaceutical workflows through partnerships, specialized offerings and acquisitions', { placeholder: 'title' });
+  label(s, 'THREE OBSERVED APPROACHES TO ENTERING LIFE SCIENCES', L, 1.62, 8);
   // Row 1 (partnering through vendors) tinted; rows 2–3 (more direct routes to pharma customers) navy
-  const bottom = taskTable(s, 2.53, [
+  const bottom = taskTable(s, 1.9, [
     ['Partner with established life-sciences vendors', ['**Anthropic + Komodo Health:** A documented partnership supporting AI-enabled healthcare analytics;', "**Anthropic + Veeva:** Claude incorporated into Veeva's industry-specific AI offerings;", '**AWS + Datavant:** Explore Assistant, publicly described in February 2026, uses Bedrock and AWS Clean Rooms to support natural-language assessment of healthcare datasets and research feasibility.'],
       'AI suppliers can contribute underlying technology to existing life-sciences platforms while those companies retain specialized data, applications and customer relationships. Komodo and Veeva already appear in our competitive analysis.'],
     ['Develop their own life-sciences-specific products and tools', ["**Anthropic's Claude for Life Sciences:** Specialized scientific tools and integrations supporting research, clinical trials and regulatory workflows;", "**OpenAI's GPT-Rosalind:** A purpose-built model for biology, drug discovery and translational research, with access expanded to eligible organizations in September 2026."],
@@ -470,25 +466,25 @@ async function slide10() {
     ['Acquire specialized life-sciences capabilities', ['**Cohere + Reliant AI:** In May 2026, Cohere acquired a biopharma AI company offering literature review, competitive landscaping and scientific/regulatory information extraction. The acquisition supports development of North for Pharma, a planned specialized agentic offering.'],
       'Acquisitions provide another way for AI companies to obtain industry-specific technology, expertise and pharmaceutical customer relationships—potentially strengthening their ability to supply or compete with established life-sciences platforms.'],
   ], {
-    head: ['AI SUPPLIER APPROACH', 'SELECTED PUBLIC DEVELOPMENTS', 'COMPETITIVE SIGNIFICANCE FOR OPTUM LIFE SCIENCES'], groupAfter: 0, colW: [1.9, 5.85, 4.38], fontSize: 9,
+    head: ['AI SUPPLIER APPROACH', 'SELECTED PUBLIC DEVELOPMENTS', 'COMPETITIVE SIGNIFICANCE FOR OPTUM LS'], groupAfter: 0, colW: [2.15, 5.85, 4.13], fontSize: 9, headH: 0.44,
     taskFill: i => (i === 0 ? COL.tint : COL.navy), taskColor: i => (i === 0 ? COL.navy : COL.white),
   });
   const qy = bottom + 0.14, qh = 6.7 - qy;
   if (qh < 0.8) console.warn('slide 10 question card too short:', qh.toFixed(2));
   card(s, L, qy, W, qh, 'strategic question card');
-  await iconDot(s, 'MdOutlineLightbulb', L + 0.2, qy + qh / 2 - 0.21, 0.42);
-  tx(s, 'THE STRATEGIC QUESTION FOR OPTUM LIFE SCIENCES', { x: L + 0.75, y: qy + 0.1, w: 1.4, h: qh - 0.2, fontSize: 8.5, bold: true, color: COL.orange, charSpacing: 1, valign: 'middle', objectName: 'label' });
+  const gq = qy + Math.max(0.08, (qh - (0.44 + 0.08 + 0.85)) / 2);
+  await iconDot(s, 'MdOutlineLightbulb', L + 0.22, gq, 0.44);
+  tx(s, 'STRATEGIC QUESTIONS FOR OPTUM LS', { x: L + 0.8, y: gq, w: 8, h: 0.44, fontSize: 13, bold: true, color: COL.orange, charSpacing: 1.5, valign: 'middle', objectName: 'label' });
   tx(s, [
-    B('As AI providers expand beyond supplying general-purpose models, where will they remain technology partners to established life-sciences vendors—and where might they increasingly compete for the same pharmaceutical customers and workflows?', { color: COL.navy, breakLine: true }),
+    B('As conversational AI providers expand beyond supplying general-purpose models, where will they remain technology partners to established life-sciences vendors—and where might they increasingly compete for the same pharmaceutical customers and workflows?', { color: COL.navy, breakLine: true }),
     B('What could these developments mean for the competitive positions of companies whose offerings combine differentiated healthcare data, research tools and scientific expertise?', { color: COL.navy, paraSpaceBefore: 6 }),
-  ], { x: L + 2.3, y: qy + 0.08, w: W - 2.5, h: qh - 0.16, fontSize: 10.5, valign: 'middle' });
+  ], { x: L + 0.8, y: gq + 0.52, w: W - 1.05, h: 0.85, fontSize: 11 });
 }
 
-// ---------- SLIDE 11 — METHODOLOGY NOTE (long notes and evidence boundaries moved off their slides) ----------
-async function slide11() {
-  const s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: 'Methodology note' });
-  s.addText('METHODOLOGY NOTE', { placeholder: 'kicker' });
-  const notes = [
+// ---------- SLIDES 11–12 — METHODOLOGY NOTE (long notes and evidence boundaries moved off their slides) ----------
+const NOTES = [
+    ['SLIDE 1 — EVIDENCE BOUNDARY', 'Public product marketing and announcements reviewed as of October 13, 2026. The findings describe selected screened inventories—not a market census, adoption rates, verified product performance or undisclosed capabilities.'],
+    ['SLIDE 2 — EVIDENCE BOUNDARY', 'Dates reflect selected public announcements or releases, not necessarily first feature availability. The timeline illustrates a research catalyst, not measured market-wide growth. AI-enabled or agentic launches are not automatically qualifying conversational products; the Norstella example is excluded from the final conversational count.'],
     ['SLIDE 3 — METHODOLOGY NOTE', [R('Comparable competitors include '), B('direct and specialized/partial offering-level competitors'), R(" serving similar customer tasks; adjacent participants are excluded. Counts represent distinct company groups per workflow, not product totals. A company may appear in multiple workflows. Optum's ○ indicates that a qualifying conversational interface was "), R('not publicly established in this review', { italic: true }), R(', not that the capability is absent. These are selected screened companies, not market-wide adoption rates.')]],
     ['SLIDE 4 — INDIA RECONCILIATION', 'Of 37 screened companies, 36 qualify as direct/specialized comparators in at least one of the five decision workflows; excluding four companies already represented in the qualifying U.S. chat cohort leaves 32. Three additional chat-marketing companies qualify: Axtria, Doceree and Genpact. Company presence in an India screen does not prove the specific product is available or deployed in India.'],
     ['SLIDE 4 — EVIDENCE BOUNDARY', 'Selected country/region screens differ in research depth and company composition and are not representative national market samples. The Nordics screen groups Denmark, Finland, Norway and Sweden. A multinational may appear in multiple country screens; the counts are not additive across countries. A globally marketed product does not establish locally verified use. Percentages show shares within screened comparable companies, not regional adoption, customer penetration or product deployment rates.'],
@@ -499,27 +495,32 @@ async function slide11() {
     ['SLIDE 9 — EVIDENCE BOUNDARY', 'Clinical trials — one qualifying U.S. offering and one selected Chinese example. Market access — one qualifying U.S. offering. No additional qualifying international market-access offering was identified in the selected inventory. The Optum comparisons are based on customer-task overlap, not identical product functionality.'],
     ['SLIDE 10 — EVIDENCE BOUNDARY', "These are selected publicly documented developments, not an exhaustive assessment of AI suppliers. The three approaches are neither mutually exclusive nor predictions of future competition. They do not establish that AI suppliers caused the recent RWE launch cluster, are displacing established vendors, or expose an Optum capability gap. Not all supplier offerings qualify as conversational products; they are not additions to the deck's product counts. North for Pharma was described as planned; Explore Assistant's general commercial availability was not established in our review."],
   ];
-  // 3 x 3 grid; each row as tall as its longest note
-  const gap = 0.16, w = (W - 2 * gap) / 3, fs = 9, cpl = Math.floor((w - 0.36) / (fs * 0.0057));
-  const hOf = n => 0.56 + runText(n[1]).reduce((k, p) => k + Math.ceil(p.length / cpl), 0) * fs * 1.22 / 72;
-  let y = 0.82;
-  for (let r = 0; r < 3; r++) {
-    const row = notes.slice(r * 3, r * 3 + 3), h = Math.max(...row.map(hOf));
+async function notesSlide(list) {
+  const s = pres.addSlide({ masterName: 'CONTENT', sectionTitle: 'Methodology note' });
+  s.addText('METHODOLOGY NOTE', { placeholder: 'kicker' });
+  // 3-column grid; each row as tall as its longest note
+  const gap = 0.18, w = (W - 2 * gap) / 3, fs = 10, cpl = Math.floor((w - 0.4) / (fs * 0.0057));
+  const hOf = n => 0.85 + runText(n[1]).reduce((k, p) => k + Math.ceil(p.length / cpl), 0) * fs * 1.22 / 72;
+  let y = 0.9;
+  for (let r = 0; r * 3 < list.length; r++) {
+    const row = list.slice(r * 3, r * 3 + 3), h = Math.max(...row.map(hOf));
     row.forEach(([lab, body], c) => {
       const x = L + c * (w + gap);
       card(s, x, y, w, h, lab.toLowerCase());
-      tx(s, lab, { x: x + 0.18, y: y + 0.14, w: w - 0.36, h: 0.22, fontSize: 9, bold: true, color: COL.orange, charSpacing: 1, objectName: 'label' });
-      tx(s, body, { x: x + 0.18, y: y + 0.42, w: w - 0.36, h: h - 0.5, fontSize: fs });
+      tx(s, lab, { x: x + 0.2, y: y + 0.16, w: w - 0.4, h: 0.24, fontSize: 10, bold: true, color: COL.orange, charSpacing: 1, objectName: 'label' });
+      tx(s, body, { x: x + 0.2, y: y + 0.46, w: w - 0.4, h: h - 0.54, fontSize: fs });
     });
     y += h + gap;
   }
-  if (y > 6.8) console.warn('slide 11 notes overflow:', y.toFixed(2));
+  if (y > 6.95) console.warn('notes overflow:', y.toFixed(2));
 }
+const slide11 = () => notesSlide(NOTES.slice(0, 6));
+const slide12 = () => notesSlide(NOTES.slice(6));
 
 (async () => {
 
-  const all = [slide1, slide2, slide3, slide4, slide5, slide6, slide7, slide8, slide9, slide10, slide11];
-  const only = (process.env.SLIDES || '1,2,3,4,5,6,7,8,9,10,11').split(',').map(Number);
+  const all = [slide1, slide2, slide3, slide4, slide5, slide6, slide7, slide8, slide9, slide10, slide11, slide12];
+  const only = (process.env.SLIDES || '1,2,3,4,5,6,7,8,9,10,11,12').split(',').map(Number);
   const sections = { 1: 'Executive summary', 2: 'Research catalyst', 3: 'U.S. competitive landscape', 4: 'International competitor screens', 5: 'Workflow deep dives', 10: 'AI suppliers', 11: 'Methodology note' };
   for (const [i, fn] of all.entries()) {
     if (sections[i + 1]) pres.addSection({ title: sections[i + 1] });
